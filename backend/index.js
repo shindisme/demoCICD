@@ -1,23 +1,27 @@
 const express = require("express");
-const mysql = require("mysql2");
 const cors = require("cors");
+const { Pool } = require("pg");
 require("dotenv").config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const db = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '',
-    database: process.env.DB_NAME || 'test_db'
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
+pool.connect()
+    .then(() => console.log("✅ PostgreSQL connected"))
+    .catch(err => console.error("❌ PostgreSQL error:", err.message));
+
 app.get("/", (req, res) => {
-    res.json({ message: "Hello from Backend" });
+    res.json({ message: "Backend + PostgreSQL OK " });
 });
-const port = process.env.PORT || 3000
-app.listen(port, () => {
-    console.log(`Server running ${port}`);
+
+app.listen(process.env.PORT || 3000, () => {
+    console.log("Server running");
 });
