@@ -18,10 +18,22 @@ pool.connect()
     .then(() => console.log("✅ PostgreSQL connected"))
     .catch(err => console.error("❌ PostgreSQL error:", err.message));
 
-app.get("/", (req, res) => {
-    res.json({ message: "Backend + PostgreSQL OK " });
+app.get("/", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT NOW()");
+        res.json({
+            message: "CI/CD Backend OK 🎯",
+            time: result.rows[0].now
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "DB error",
+            error: err.message
+        });
+    }
 });
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log("Server running");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log("Server running on port", PORT);
 });
